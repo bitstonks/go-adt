@@ -1,9 +1,10 @@
 package main
 
-import "sort"
-
-import "golang.org/x/exp/constraints"
-import "github.com/bitstonks/go-adt/set"
+import (
+	"github.com/bitstonks/go-adt/set"
+	"golang.org/x/exp/constraints"
+	"sort"
+)
 
 func pset[K constraints.Ordered](s set.Set[K]) {
 	i := 0
