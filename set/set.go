@@ -35,16 +35,26 @@ func New[Key comparable](keys ...Key) Set[Key] {
 	return resultset
 }
 
+// The union of all the sets: ⋃(sets) = set[0] ∪ set[1] ∪ set[2] ...
 func Union[Key comparable](sets ...Set[Key]) Set[Key] {
 	resultset := make(Set[Key])
-	for i := range sets {
-		for k := range sets[i] {
-			resultset[k] = struct{}{}
-		}
-	}
+	resultset.Union(sets...)
 	return resultset
 }
 
+// Like Union, but modifies the set in place.
+func (s Set[Key]) Union(sets ...Set[Key]) {
+	if sets == nil {
+		return
+	}
+	for i := range sets {
+		for k := range sets[i] {
+			s[k] = struct{}{}
+		}
+	}
+}
+
+// The intersection of all the sets: ⋂(sets) = set[0] ∩ set[1] ∩ set[2] ...
 func Intersection[Key comparable](sets ...Set[Key]) Set[Key] {
 	// The intersection of no sets is the empty set.
 	if sets == nil {
@@ -83,6 +93,38 @@ outer:
 	return resultset
 }
 
+// Like Intersection, but modifies the set in place.
+func (s Set[Key]) Intersect(sets ...Set[Key]) {
+	if sets == nil {
+		return
+	}
+
+	// Clear the set if any of the arguments is an empty set.
+	for i := range sets {
+		if len(sets[i]) == 0 {
+			for k := range s {
+				delete(s, k)
+			}
+			return
+		}
+	}
+
+	rm := make([]Key, 0, len(s))
+outer:
+	for k := range s {
+		for i := range sets {
+			if !sets[i].Contains(k) {
+				rm = append(rm, k)
+				continue outer
+			}
+		}
+	}
+	for i := range rm {
+		delete(s, rm[i])
+	}
+}
+
+// The difference of all the sets: sets[0] ∖ sets[1] ∖ sets[2] ...
 func Difference[Key comparable](sets ...Set[Key]) Set[Key] {
 	// The difference of no sets is the empty set
 	if sets == nil {
@@ -109,6 +151,43 @@ outer:
 	return resultset
 }
 
+// Like Difference, but modifies the set in place.
+func (s Set[Key]) Remove(sets ...Set[Key]) {
+	if sets == nil {
+		return
+	}
+
+	rm := make([]Key, 0, len(s))
+outer:
+	for k := range s {
+		for i := range sets {
+			if sets[i].Contains(k) {
+				rm = append(rm, k)
+				continue outer
+			}
+		}
+	}
+	for i := range rm {
+		delete(s, rm[i])
+	}
+}
+
+// Symmetric difference of all the sets: ⋃(sets) ∖ ⋂(sets).
 func SymmetricDifference[Key comparable](sets ...Set[Key]) Set[Key] {
+	// The symmetric difference of no sets is the empty set
+	if sets == nil {
+		return make(Set[Key])
+	}
 	return Difference(Union(sets...), Intersection(sets...))
+}
+
+// Like SymmetricDifference, but modifies the set in place.
+func (s Set[Key]) SymmetricRemove(sets ...Set[Key]) {
+	if sets == nil {
+		return
+	}
+	rm := Intersection(sets...)
+	rm.Intersect(s)
+	s.Union(sets...)
+	s.Remove(rm)
 }
