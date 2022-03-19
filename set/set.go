@@ -16,9 +16,15 @@ func (s Set[Key]) Add(keys ...Key) {
 	}
 }
 
-func (s Set[Key]) Contains(key Key) bool {
-	_, exists := s[key]
-	return exists
+// Checks if the set contains all of the given keys.
+// Returns true when called without arguments.
+func (s Set[Key]) Contains(keys ...Key) bool {
+	for i := range keys {
+		if !s.has(keys[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 func (s Set[Key]) Copy() Set[Key] {
@@ -78,7 +84,7 @@ func Disjoint[Key comparable](sets ...Set[Key]) bool {
 outer:
 	for k := range candidate {
 		for i := range others {
-			if !others[i].Contains(k) {
+			if !others[i].has(k) {
 				continue outer
 			}
 		}
@@ -132,7 +138,7 @@ func Intersection[Key comparable](sets ...Set[Key]) Set[Key] {
 outer:
 	for k := range candidate {
 		for i := range others {
-			if !others[i].Contains(k) {
+			if !others[i].has(k) {
 				continue outer
 			}
 		}
@@ -159,7 +165,7 @@ func (s Set[Key]) Intersect(sets ...Set[Key]) {
 outer:
 	for k := range s {
 		for i := range sets {
-			if !sets[i].Contains(k) {
+			if !sets[i].has(k) {
 				rm = append(rm, k)
 				continue outer
 			}
@@ -188,7 +194,7 @@ func Difference[Key comparable](sets ...Set[Key]) Set[Key] {
 outer:
 	for k := range candidate {
 		for i := range others {
-			if others[i].Contains(k) {
+			if others[i].has(k) {
 				continue outer
 			}
 		}
@@ -208,7 +214,7 @@ func (s Set[Key]) Remove(sets ...Set[Key]) {
 outer:
 	for k := range s {
 		for i := range sets {
-			if sets[i].Contains(k) {
+			if sets[i].has(k) {
 				rm = append(rm, k)
 				continue outer
 			}
@@ -247,6 +253,11 @@ func (s Set[Key]) clear() {
 	for k := range s {
 		delete(s, k)
 	}
+}
+
+func (s Set[Key]) has(key Key) bool {
+	_, exists := s[key]
+	return exists
 }
 
 func sortSetsByLength[Key comparable](sets ...Set[Key]) []Set[Key] {
