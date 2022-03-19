@@ -7,12 +7,6 @@ import (
 
 type Set[Key comparable] map[Key]struct{}
 
-func (s Set[Key]) clear() {
-	for k := range s {
-		delete(s, k)
-	}
-}
-
 func (s Set[Key]) Add(keys ...Key) {
 	if len(keys) == 0 {
 		return
@@ -46,26 +40,6 @@ func New[Key comparable](keys ...Key) Set[Key] {
 
 func Equal[Key comparable](s1, s2 Set[Key]) bool {
 	return reflect.DeepEqual(s1, s2)
-}
-
-func sortSetsByLength[Key comparable](sets ...Set[Key]) []Set[Key] {
-	if len(sets) < 2 {
-		panic("invalid arguments")
-	}
-
-	// Do *not* modify the function argument array, copy it before sorting.
-	if len(sets) == 2 {
-		if len(sets[1]) < len(sets[0]) {
-			return []Set[Key]{sets[1], sets[0]}
-		}
-		return sets
-	} else {
-		sorted := append(make([]Set[Key], 0, len(sets)), sets...)
-		sort.Slice(sorted, func(i, j int) bool {
-			return len(sorted[i]) < len(sorted[j])
-		})
-		return sorted
-	}
 }
 
 // Checks if sets are disjoint: ⋂(sets) = ∅
@@ -256,4 +230,30 @@ func (s Set[Key]) SymmetricRemove(sets ...Set[Key]) {
 	rm.Intersect(sets...)
 	s.Union(sets...)
 	s.Remove(rm)
+}
+
+func (s Set[Key]) clear() {
+	for k := range s {
+		delete(s, k)
+	}
+}
+
+func sortSetsByLength[Key comparable](sets ...Set[Key]) []Set[Key] {
+	if len(sets) < 2 {
+		panic("invalid arguments")
+	}
+
+	// Do *not* modify the function argument array, copy it before sorting.
+	if len(sets) == 2 {
+		if len(sets[1]) < len(sets[0]) {
+			return []Set[Key]{sets[1], sets[0]}
+		}
+		return sets
+	} else {
+		sorted := append(make([]Set[Key], 0, len(sets)), sets...)
+		sort.Slice(sorted, func(i, j int) bool {
+			return len(sorted[i]) < len(sorted[j])
+		})
+		return sorted
+	}
 }
