@@ -125,7 +125,7 @@ func TestUnion(t *testing.T) {
 	t.Run("s3,s2,s1", func(t *testing.T) { check(t, union_s1_s2_s3, s3, s2, s1) })
 }
 
-func TestIntersection(t *testing.T) {
+func TestIntersectionDisjoint(t *testing.T) {
 	isect_s1_s2 := New[E](3, 4)
 	isect_s2_s3 := New[E](6, 7)
 	isect_s1_s3 := null
@@ -143,6 +143,12 @@ func TestIntersection(t *testing.T) {
 			if !Equal(expected, s) {
 				t.Error("[in-place] expected", contents(expected), "got", contents(s))
 			}
+		}
+
+		disjoint := Equal(expected, null)
+		f := Disjoint(sets...)
+		if disjoint != f {
+			t.Error("[disjoint] expected", disjoint, "got", f)
 		}
 	}
 

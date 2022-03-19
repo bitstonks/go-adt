@@ -48,6 +48,60 @@ func Equal[Key comparable](s1, s2 Set[Key]) bool {
 	return reflect.DeepEqual(s1, s2)
 }
 
+func sortSetsByLength[Key comparable](sets ...Set[Key]) []Set[Key] {
+	if len(sets) < 2 {
+		panic("invalid arguments")
+	}
+
+	// Do *not* modify the function argument array, copy it before sorting.
+	if len(sets) == 2 {
+		if len(sets[1]) < len(sets[0]) {
+			return []Set[Key]{sets[1], sets[0]}
+		}
+		return sets
+	} else {
+		sorted := append(make([]Set[Key], 0, len(sets)), sets...)
+		sort.Slice(sorted, func(i, j int) bool {
+			return len(sorted[i]) < len(sorted[j])
+		})
+		return sorted
+	}
+}
+
+// Checks if sets are disjoint: ⋂(sets) = ∅
+func Disjoint[Key comparable](sets ...Set[Key]) bool {
+	// No sets are always disjoint.
+	if len(sets) == 0 {
+		return true
+	}
+
+	// One set is disjoint if it's empty.
+	if len(sets) == 1 {
+		return len(sets[0]) == 0
+	}
+
+	// Use the smallest set to check the others.
+	sorted_sets := sortSetsByLength(sets...)
+	candidate := sorted_sets[0]
+
+	// Any empty set in the arguments means the sets are disjoint.
+	if len(candidate) == 0 {
+		return true
+	}
+
+	others := sorted_sets[1:]
+outer:
+	for k := range candidate {
+		for i := range others {
+			if !others[i].Contains(k) {
+				continue outer
+			}
+		}
+		return false
+	}
+	return true
+}
+
 // The union of all the sets: ⋃(sets) = set[0] ∪ set[1] ∪ set[2] ...
 func Union[Key comparable](sets ...Set[Key]) Set[Key] {
 	resultset := make(Set[Key])
@@ -80,11 +134,7 @@ func Intersection[Key comparable](sets ...Set[Key]) Set[Key] {
 	}
 
 	// Use the smallest set as the candidate result.
-	// Do *not* modify the function argument array, copy it before sorting.
-	sorted_sets := append(make([]Set[Key], 0, len(sets)), sets...)
-	sort.Slice(sorted_sets, func(i, j int) bool {
-		return len(sorted_sets[i]) < len(sorted_sets[j])
-	})
+	sorted_sets := sortSetsByLength(sets...)
 	candidate := sorted_sets[0]
 
 	// Any empty set in the arguments produces an empty intersection.
