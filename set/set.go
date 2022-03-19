@@ -38,8 +38,19 @@ func New[Key comparable](keys ...Key) Set[Key] {
 	return resultset
 }
 
-func Equal[Key comparable](s1, s2 Set[Key]) bool {
-	return reflect.DeepEqual(s1, s2)
+// Checks if sets are equal: ⋃(sets) = sets[0]
+// No sets and one set are always equal.
+func Equal[Key comparable](sets ...Set[Key]) bool {
+	if len(sets) > 1 {
+		first := sets[0]
+		rest := sets[1:]
+		for i := range rest {
+			if !reflect.DeepEqual(first, rest[i]) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // Checks if sets are disjoint: ⋂(sets) = ∅
@@ -76,7 +87,7 @@ outer:
 	return true
 }
 
-// The union of all the sets: ⋃(sets) = set[0] ∪ set[1] ∪ set[2] ...
+// The union of all the sets: ⋃(sets) = sets[0] ∪ sets[1] ∪ sets[2] ...
 func Union[Key comparable](sets ...Set[Key]) Set[Key] {
 	resultset := make(Set[Key])
 	resultset.Union(sets...)
@@ -95,7 +106,7 @@ func (s Set[Key]) Union(sets ...Set[Key]) {
 	}
 }
 
-// The intersection of all the sets: ⋂(sets) = set[0] ∩ set[1] ∩ set[2] ...
+// The intersection of all the sets: ⋂(sets) = sets[0] ∩ sets[1] ∩ sets[2] ...
 func Intersection[Key comparable](sets ...Set[Key]) Set[Key] {
 	// The intersection of no sets is the empty set.
 	if len(sets) == 0 {
