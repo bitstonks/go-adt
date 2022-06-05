@@ -7,72 +7,35 @@ import (
 
 type Set[Key comparable] map[Key]struct{}
 
-func (s Set[Key]) Add(keys ...Key) {
+// Creates a new set that contains all the given keys.
+func New[Key comparable](keys ...Key) Set[Key] {
 	if len(keys) == 0 {
-		return
+		return make(Set[Key])
 	}
+	resultset := make(Set[Key], len(keys))
 	for i := range keys {
-		s[keys[i]] = struct{}{}
+		resultset[keys[i]] = struct{}{}
 	}
+	return resultset
 }
 
-// Checks if the set contains all of the given keys.
-// Returns true when called without arguments.
-func (s Set[Key]) Contains(keys ...Key) bool {
-	for i := range keys {
-		if !s.has(keys[i]) {
+// Checks if sets are equal: ⋂(a, b, sets) = a
+func Equal[Key comparable](a, b Set[Key], sets ...Set[Key]) bool {
+	if !reflect.DeepEqual(a, b) {
+		return false
+	}
+	for i := range sets {
+		if !reflect.DeepEqual(a, sets[i]) {
 			return false
 		}
 	}
 	return true
 }
 
-func (s Set[Key]) Copy() Set[Key] {
-	resultset := make(Set[Key], len(s))
-	for k := range s {
-		resultset[k] = struct{}{}
-	}
-	return resultset
-}
-
-func New[Key comparable](keys ...Key) Set[Key] {
-	if len(keys) == 0 {
-		return make(Set[Key])
-	}
-	resultset := make(Set[Key], len(keys))
-	resultset.Add(keys...)
-	return resultset
-}
-
-// Checks if sets are equal: ⋃(sets) = sets[0]
-// No sets and one set are always equal.
-func Equal[Key comparable](sets ...Set[Key]) bool {
-	if len(sets) > 1 {
-		first := sets[0]
-		rest := sets[1:]
-		for i := range rest {
-			if !reflect.DeepEqual(first, rest[i]) {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-// Checks if sets are disjoint: ⋂(sets) = ∅
-func Disjoint[Key comparable](sets ...Set[Key]) bool {
-	// No sets are always disjoint.
-	if len(sets) == 0 {
-		return true
-	}
-
-	// One set is disjoint if it's empty.
-	if len(sets) == 1 {
-		return len(sets[0]) == 0
-	}
-
+// Checks if sets are disjoint: ⋂(a, b, sets) = ∅
+func Disjoint[Key comparable](a, b Set[Key], sets ...Set[Key]) bool {
 	// Use the smallest set to check the others.
-	sorted_sets := sortSetsByLength(sets...)
+	sorted_sets := sortSetsByLength(a, b, sets...)
 	candidate := sorted_sets[0]
 
 	// Any empty set in the arguments means the sets are disjoint.
@@ -93,17 +56,47 @@ outer:
 	return true
 }
 
-// The union of all the sets: ⋃(sets) = sets[0] ∪ sets[1] ∪ sets[2] ...
-func Union[Key comparable](sets ...Set[Key]) Set[Key] {
-	resultset := make(Set[Key])
-	resultset.Union(sets...)
+// Creates a deep copy of the set.
+func (s Set[Key]) Copy() Set[Key] {
+	resultset := make(Set[Key], len(s))
+	for k := range s {
+		resultset[k] = struct{}{}
+	}
+	return resultset
+}
+
+// Checks if the set contains all of the given keys.
+func (s Set[Key]) Contains(key Key, keys ...Key) bool {
+	if !s.has(key) {
+		return false
+	}
+	for i := range keys {
+		if !s.has(keys[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+// Adds keys to the set.
+func (s Set[Key]) Add(key Key, keys ...Key) {
+	s[key] = struct{}{}
+	for i := range keys {
+		s[keys[i]] = struct{}{}
+	}
+}
+
+// The union of all the sets: ⋃(a, b, sets) = a ∪ b ∪ sets[0] ∪ sets[1] ...
+func Union[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
+	resultset := a.Copy()
+	resultset.Extend(b, sets...)
 	return resultset
 }
 
 // Like Union, but modifies the set in place.
-func (s Set[Key]) Union(sets ...Set[Key]) {
-	if len(sets) == 0 {
-		return
+func (s Set[Key]) Extend(a Set[Key], sets ...Set[Key]) {
+	for k := range a {
+		s[k] = struct{}{}
 	}
 	for i := range sets {
 		for k := range sets[i] {
@@ -112,20 +105,10 @@ func (s Set[Key]) Union(sets ...Set[Key]) {
 	}
 }
 
-// The intersection of all the sets: ⋂(sets) = sets[0] ∩ sets[1] ∩ sets[2] ...
-func Intersection[Key comparable](sets ...Set[Key]) Set[Key] {
-	// The intersection of no sets is the empty set.
-	if len(sets) == 0 {
-		return make(Set[Key])
-	}
-
-	// The intersection of one set is the set itself.
-	if len(sets) == 1 {
-		return sets[0].Copy()
-	}
-
+// The intersection of all the sets: ⋂(a, b, sets) = a ∩ b ∩ sets[0] ∩ sets[1] ...
+func Intersection[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
 	// Use the smallest set as the candidate result.
-	sorted_sets := sortSetsByLength(sets...)
+	sorted_sets := sortSetsByLength(a, b, sets...)
 	candidate := sorted_sets[0]
 
 	// Any empty set in the arguments produces an empty intersection.
@@ -148,12 +131,14 @@ outer:
 }
 
 // Like Intersection, but modifies the set in place.
-func (s Set[Key]) Intersect(sets ...Set[Key]) {
-	if len(sets) == 0 {
+func (s Set[Key]) Intersect(a Set[Key], sets ...Set[Key]) {
+	// The result will be empty if this set is empty.
+	if len(s) == 0 {
 		return
 	}
 
 	// Clear the set if any of the arguments is an empty set.
+	sets = append(sets, a)
 	for i := range sets {
 		if len(sets[i]) == 0 {
 			s.clear()
@@ -176,25 +161,14 @@ outer:
 	}
 }
 
-// The difference of all the sets: sets[0] ∖ sets[1] ∖ sets[2] ...
-func Difference[Key comparable](sets ...Set[Key]) Set[Key] {
-	// The difference of no sets is the empty set.
-	if len(sets) == 0 {
-		return make(Set[Key])
-	}
-
-	// The difference of one set is the set itself.
-	if len(sets) == 1 {
-		return sets[0].Copy()
-	}
-
-	candidate := sets[0]
-	others := sets[1:]
-	resultset := make(Set[Key], len(candidate))
+// The difference of all the sets: a ∖ b ∖ sets[0] ∖ sets[1] ...
+func Difference[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
+	sets = append(sets, b)
+	resultset := make(Set[Key], len(a))
 outer:
-	for k := range candidate {
-		for i := range others {
-			if others[i].has(k) {
+	for k := range a {
+		for i := range sets {
+			if sets[i].has(k) {
 				continue outer
 			}
 		}
@@ -204,12 +178,8 @@ outer:
 }
 
 // Like Difference, but modifies the set in place.
-func (s Set[Key]) Remove(sets ...Set[Key]) {
-	// The difference of one set is the set itself.
-	if len(sets) == 0 {
-		return
-	}
-
+func (s Set[Key]) Remove(a Set[Key], sets ...Set[Key]) {
+	sets = append(sets, a)
 	rm := make([]Key, 0, len(s))
 outer:
 	for k := range s {
@@ -225,27 +195,22 @@ outer:
 	}
 }
 
-// Symmetric difference of all the sets: ⋃(sets) ∖ ⋂(sets).
-func SymmetricDifference[Key comparable](sets ...Set[Key]) Set[Key] {
-	// The symmetric difference of no sets or one set is the empty set.
-	if len(sets) == 0 || len(sets) == 1 {
-		return make(Set[Key])
-	}
-
-	return Difference(Union(sets...), Intersection(sets...))
+// Symmetric difference of all the sets: ⋃(a, b, sets) ∖ ⋂(a, b, sets).
+func SymmetricDifference[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
+	return Difference(Union(a, b, sets...), Intersection(a, b, sets...))
 }
 
 // Like SymmetricDifference, but modifies the set in place.
-func (s Set[Key]) SymmetricRemove(sets ...Set[Key]) {
+func (s Set[Key]) SymmetricRemove(a Set[Key], sets ...Set[Key]) {
 	// The symmetric difference of a set with itself is the empty set.
-	if len(sets) == 0 {
+	if &s == &a {
 		s.clear()
 		return
 	}
 
 	rm := s.Copy()
-	rm.Intersect(sets...)
-	s.Union(sets...)
+	rm.Intersect(a, sets...)
+	s.Extend(a, sets...)
 	s.Remove(rm)
 }
 
@@ -260,19 +225,16 @@ func (s Set[Key]) has(key Key) bool {
 	return exists
 }
 
-func sortSetsByLength[Key comparable](sets ...Set[Key]) []Set[Key] {
-	if len(sets) < 2 {
-		panic("invalid arguments")
-	}
-
+func sortSetsByLength[Key comparable](a, b Set[Key], sets ...Set[Key]) []Set[Key] {
 	// Do *not* modify the function argument array, copy it before sorting.
-	if len(sets) == 2 {
-		if len(sets[1]) < len(sets[0]) {
-			return []Set[Key]{sets[1], sets[0]}
+	if len(sets) == 0 {
+		if len(b) < len(a) {
+			return []Set[Key]{b, a}
 		}
-		return sets
+		return []Set[Key]{a, b}
 	} else {
-		sorted := append(make([]Set[Key], 0, len(sets)), sets...)
+		sorted := make([]Set[Key], 0, 2+len(sets))
+		sorted = append(append(append(sorted, a), b), sets...)
 		sort.Slice(sorted, func(i, j int) bool {
 			return len(sorted[i]) < len(sorted[j])
 		})
