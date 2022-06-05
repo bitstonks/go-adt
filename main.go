@@ -36,13 +36,13 @@ func main() {
 	print("\nUnion: s1 ∪ s2\n")
 	pset(set.Union(s1, s2))
 	s = s1.Copy()
-	s.Union(s2)
+	s.Extend(s2)
 	pset(s)
 
 	print("\nUnion: s2 ∪ s1\n")
 	pset(set.Union(s2, s1))
 	s = s2.Copy()
-	s.Union(s1)
+	s.Extend(s1)
 	pset(s)
 
 	print("\nIntersection s1 ∩ s2:\n")
