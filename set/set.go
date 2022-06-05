@@ -56,7 +56,7 @@ outer:
 	return true
 }
 
-// Creates a deep copy of the set.
+// Creates a deep copy of the set. Will never return nil.
 func (s Set[Key]) Copy() Set[Key] {
 	resultset := make(Set[Key], len(s))
 	for k := range s {
@@ -83,6 +83,14 @@ func (s Set[Key]) Add(key Key, keys ...Key) {
 	s[key] = struct{}{}
 	for i := range keys {
 		s[keys[i]] = struct{}{}
+	}
+}
+
+// Delets keys from the set.
+func (s Set[Key]) Del(key Key, keys ...Key) {
+	delete(s, key)
+	for i := range keys {
+		delete(s, keys[i])
 	}
 }
 

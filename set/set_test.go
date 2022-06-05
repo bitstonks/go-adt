@@ -41,6 +41,73 @@ var s1 = New[E](0, 1, 2, 3, 4)
 var s2 = New[E](3, 4, 5, 6, 7)
 var s3 = New[E](6, 7, 8, 9, 10)
 
+func TestCopy(t *testing.T) {
+	t.Parallel()
+
+	check := func(t *testing.T, expected, s Set[E]) {
+		assert.Equal(t, expected, s.Copy())
+	}
+	t.Run("nil", func(t *testing.T) { check(t, null, nil) })
+	t.Run("null", func(t *testing.T) { check(t, null, null) })
+	t.Run("s1", func(t *testing.T) { check(t, s1, s1) })
+	t.Run("s2", func(t *testing.T) { check(t, s2, s2) })
+	t.Run("s3", func(t *testing.T) { check(t, s3, s3) })
+}
+
+func TestContains(t *testing.T) {
+	t.Parallel()
+
+	check := func(t *testing.T, expected bool, s Set[E], key E, keys ...E) {
+		assert.Equal(t, expected, s.Contains(key, keys...))
+	}
+
+	t.Run("null,0", func(t *testing.T) { check(t, false, null, 0) })
+	t.Run("s1,0", func(t *testing.T) { check(t, true, s1, 0) })
+	t.Run("s2,0", func(t *testing.T) { check(t, false, s2, 0) })
+	t.Run("s3,0", func(t *testing.T) { check(t, false, s3, 0) })
+	t.Run("s1,2,3,4", func(t *testing.T) { check(t, true, s1, 2, 3, 4) })
+	t.Run("s2,2,3,4", func(t *testing.T) { check(t, false, s2, 2, 3, 4) })
+	t.Run("s3,2,3,4", func(t *testing.T) { check(t, false, s3, 2, 3, 4) })
+}
+
+func TestAdd(t *testing.T) {
+	t.Parallel()
+
+	check := func(t *testing.T, expected Set[E], s Set[E], key E, keys ...E) {
+		s = s.Copy()
+		s.Add(key, keys...)
+		assert.Equal(t, expected, s)
+	}
+
+	t.Run("null,0", func(t *testing.T) { check(t, New[E](0), null, 0) })
+	t.Run("null,0,0", func(t *testing.T) { check(t, New[E](0), null, 0, 0) })
+	t.Run("s1,0", func(t *testing.T) { check(t, s1, s1, 0) })
+	t.Run("s2,0", func(t *testing.T) { check(t, New[E](0, 3, 4, 5, 6, 7), s2, 0) })
+	t.Run("s1,0, 0", func(t *testing.T) { check(t, s1, s1, 0, 0) })
+	t.Run("s1,2,3,4", func(t *testing.T) { check(t, s1, s1, 2, 3, 4) })
+	t.Run("s2,2,3,4", func(t *testing.T) { check(t, New[E](2, 3, 4, 5, 6, 7), s2, 2, 3, 4) })
+	t.Run("s3,2,3,4", func(t *testing.T) { check(t, New[E](2, 3, 4, 6, 7, 8, 9, 10), s3, 2, 3, 4) })
+}
+
+func TestDel(t *testing.T) {
+	t.Parallel()
+
+	check := func(t *testing.T, expected Set[E], s Set[E], key E, keys ...E) {
+		s = s.Copy()
+		s.Del(key, keys...)
+		assert.Equal(t, expected, s)
+	}
+
+	t.Run("null,0", func(t *testing.T) { check(t, null, null, 0) })
+	t.Run("null,0,0", func(t *testing.T) { check(t, null, null, 0, 0) })
+	t.Run("s1,0", func(t *testing.T) { check(t, New[E](1, 2, 3, 4), s1, 0) })
+	t.Run("s2,0", func(t *testing.T) { check(t, s2, s2, 0) })
+	t.Run("s2,0, 0", func(t *testing.T) { check(t, s2, s2, 0, 0) })
+	t.Run("s1,2,3,4", func(t *testing.T) { check(t, New[E](0, 1), s1, 2, 3, 4) })
+	t.Run("s2,2,3,4", func(t *testing.T) { check(t, New[E](5, 6, 7), s2, 2, 3, 4) })
+	t.Run("s3,2,3,4", func(t *testing.T) { check(t, s3, s3, 2, 3, 4) })
+}
+
 func TestEqual(t *testing.T) {
 	t.Parallel()
 
