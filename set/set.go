@@ -97,12 +97,12 @@ func (s Set[Key]) Del(key Key, keys ...Key) {
 // The union of all the sets: ⋃(a, b, sets) = a ∪ b ∪ sets[0] ∪ sets[1] ...
 func Union[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
 	resultset := a.Copy()
-	resultset.Extend(b, sets...)
+	resultset.Update(b, sets...)
 	return resultset
 }
 
 // Like Union, but modifies the set in place.
-func (s Set[Key]) Extend(a Set[Key], sets ...Set[Key]) {
+func (s Set[Key]) Update(a Set[Key], sets ...Set[Key]) {
 	for k := range a {
 		s[k] = struct{}{}
 	}
@@ -218,7 +218,7 @@ func (s Set[Key]) SymmetricRemove(a Set[Key], sets ...Set[Key]) {
 
 	rm := s.Copy()
 	rm.Intersect(a, sets...)
-	s.Extend(a, sets...)
+	s.Update(a, sets...)
 	s.Remove(rm)
 }
 
