@@ -189,7 +189,7 @@ func TestUnion(t *testing.T) {
 		assert.Equal(t, expected, Union(a, b, sets...))
 
 		s := a.Copy()
-		s.Extend(b, sets...)
+		s.Update(b, sets...)
 		assert.Equal(t, expected, s)
 	}
 
