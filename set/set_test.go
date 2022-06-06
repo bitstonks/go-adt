@@ -240,7 +240,9 @@ func TestUnion(t *testing.T) {
 		assert.Equal(t, expected, s)
 	}
 
+	t.Run("s1,nil", func(t *testing.T) { check(t, s1, s1, snil) })
 	t.Run("s1,null", func(t *testing.T) { check(t, s1, s1, null) })
+	t.Run("nil,s1", func(t *testing.T) { check(t, s1, snil, s1) })
 	t.Run("null,s1", func(t *testing.T) { check(t, s1, null, s1) })
 	t.Run("s1,s1", func(t *testing.T) { check(t, s1, s1, s1) })
 	t.Run("s2,s2", func(t *testing.T) { check(t, s2, s2, s2) })
@@ -279,7 +281,9 @@ func TestIntersectionDisjoint(t *testing.T) {
 		assert.Equal(t, disjoint, f)
 	}
 
-	t.Run("s1,null", func(t *testing.T) { check(t, null, s1, null) })
+	t.Run("s1,null", func(t *testing.T) { check(t, null, s1, snil) })
+	t.Run("s1,nil", func(t *testing.T) { check(t, null, s1, null) })
+	t.Run("nil,s1", func(t *testing.T) { check(t, null, snil, s1) })
 	t.Run("null,s1", func(t *testing.T) { check(t, null, null, s1) })
 	t.Run("s1,s1", func(t *testing.T) { check(t, s1, s1, s1) })
 	t.Run("s2,s2", func(t *testing.T) { check(t, s2, s2, s2) })
@@ -322,7 +326,9 @@ func TestDifference(t *testing.T) {
 		assert.Equal(t, expected, s)
 	}
 
+	t.Run("s1,nil", func(t *testing.T) { check(t, s1, s1, snil) })
 	t.Run("s1,null", func(t *testing.T) { check(t, s1, s1, null) })
+	t.Run("nil,s1", func(t *testing.T) { check(t, null, snil, s1) })
 	t.Run("null,s1", func(t *testing.T) { check(t, null, null, s1) })
 	t.Run("s1,s1", func(t *testing.T) { check(t, null, s1, s1) })
 	t.Run("s2,s2", func(t *testing.T) { check(t, null, s2, s2) })
@@ -357,7 +363,9 @@ func TestSymmetricDifference(t *testing.T) {
 		assert.Equal(t, expected, s)
 	}
 
+	t.Run("s1,nil", func(t *testing.T) { check(t, s1, s1, snil) })
 	t.Run("s1,null", func(t *testing.T) { check(t, s1, s1, null) })
+	t.Run("nil,s1", func(t *testing.T) { check(t, s1, snil, s1) })
 	t.Run("null,s1", func(t *testing.T) { check(t, s1, null, s1) })
 	t.Run("s1,s1", func(t *testing.T) { check(t, null, s1, s1) })
 	t.Run("s2,s2", func(t *testing.T) { check(t, null, s2, s2) })
