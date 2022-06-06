@@ -139,6 +139,11 @@ func (s Set[Key]) Update(a Set[Key], sets ...Set[Key]) {
 
 // The intersection of all the sets: ⋂(a, b, sets) = a ∩ b ∩ sets[0] ∩ sets[1] ...
 func Intersection[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
+	// The result will be empty if any of the sets are empty.
+	if len(a) == 0 || len(b) == 0 {
+		return make(Set[Key])
+	}
+
 	// Use the smallest set as the candidate result.
 	sorted_sets := sortSetsByLength(a, b, sets...)
 	candidate := sorted_sets[0]
@@ -195,6 +200,11 @@ outer:
 
 // The difference of all the sets: a ∖ b ∖ sets[0] ∖ sets[1] ...
 func Difference[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
+	// The result will be empty if the first set is empty.
+	if len(a) == 0 {
+		return make(Set[Key])
+	}
+
 	sets = append(sets, b)
 	resultset := make(Set[Key], len(a))
 outer:
@@ -211,6 +221,11 @@ outer:
 
 // Like Difference, but modifies the set in place.
 func (s Set[Key]) Remove(a Set[Key], sets ...Set[Key]) {
+	// The result will be empty if this set is empty.
+	if len(s) == 0 {
+		return
+	}
+
 	sets = append(sets, a)
 	rm := make([]Key, 0, len(s))
 outer:
