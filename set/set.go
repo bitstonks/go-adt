@@ -56,6 +56,30 @@ outer:
 	return true
 }
 
+// Returns a pair of values:
+//  - ok=true if s is a subset of other
+//  - proper=true if s is a proper subset (i.e., !Equal(s, other)))
+func (s Set[Key]) IsSubsetOf(other Set[Key]) (ok bool, proper bool) {
+	if len(s) > len(other) {
+		return false, false
+	}
+	if len(s) > 0 {
+		for k := range s {
+			if !other.has(k) {
+				return false, false
+			}
+		}
+	}
+	return true, len(s) < len(other)
+}
+
+// Returns a pair of values:
+//  - ok=true if s is a superset of other
+//  - proper=true if s is a proper superset (i.e., !Equal(s, other)))
+func (s Set[Key]) IsSupersetOf(other Set[Key]) (ok bool, proper bool) {
+	return other.IsSubsetOf(s)
+}
+
 // Creates a deep copy of the set. Will never return nil.
 func (s Set[Key]) Copy() Set[Key] {
 	resultset := make(Set[Key], len(s))

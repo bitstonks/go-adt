@@ -40,6 +40,7 @@ var null = New[E]()
 var s1 = New[E](0, 1, 2, 3, 4)
 var s2 = New[E](3, 4, 5, 6, 7)
 var s3 = New[E](6, 7, 8, 9, 10)
+var subset3 = New[E](6, 7)
 
 func TestCopy(t *testing.T) {
 	t.Parallel()
@@ -175,6 +176,52 @@ func TestEqual(t *testing.T) {
 	t.Run("s3,s3,s2", func(t *testing.T) { check(t, false, s3, s3, s2) })
 	t.Run("s3,s2,s3", func(t *testing.T) { check(t, false, s3, s2, s3) })
 	t.Run("s2,s3,s3", func(t *testing.T) { check(t, false, s2, s3, s3) })
+}
+
+func TestSubsetOf(t *testing.T) {
+	t.Parallel()
+
+	check := func(t *testing.T, expected, proper bool, a, b Set[E]) {
+		e, p := a.IsSubsetOf(b)
+		assert.Equal(t, expected, e)
+		assert.Equal(t, proper, p)
+	}
+
+	t.Run("nil,nil", func(t *testing.T) { check(t, true, false, snil, snil) })
+	t.Run("nil,null", func(t *testing.T) { check(t, true, false, snil, null) })
+	t.Run("null,nil", func(t *testing.T) { check(t, true, false, null, snil) })
+	t.Run("nil,s1", func(t *testing.T) { check(t, true, true, snil, s1) })
+	t.Run("null,s1", func(t *testing.T) { check(t, true, true, null, s1) })
+	t.Run("s2,nil", func(t *testing.T) { check(t, false, false, s2, snil) })
+	t.Run("s2,null", func(t *testing.T) { check(t, false, false, s2, null) })
+	t.Run("s1,s2", func(t *testing.T) { check(t, false, false, s1, s2) })
+	t.Run("s2,s1", func(t *testing.T) { check(t, false, false, s2, s1) })
+	t.Run("s3,s3", func(t *testing.T) { check(t, true, false, s3, s3) })
+	t.Run("{6,7},s3", func(t *testing.T) { check(t, true, true, subset3, s3) })
+	t.Run("s3,{6,7}", func(t *testing.T) { check(t, false, false, s3, subset3) })
+}
+
+func TestSupersetOf(t *testing.T) {
+	t.Parallel()
+
+	check := func(t *testing.T, expected, proper bool, a, b Set[E]) {
+		e, p := a.IsSupersetOf(b)
+		assert.Equal(t, expected, e)
+		assert.Equal(t, proper, p)
+	}
+
+	t.Run("nil,nil", func(t *testing.T) { check(t, true, false, snil, snil) })
+	t.Run("nil,null", func(t *testing.T) { check(t, true, false, snil, null) })
+	t.Run("null,nil", func(t *testing.T) { check(t, true, false, null, snil) })
+	t.Run("nil,s1", func(t *testing.T) { check(t, false, false, snil, s1) })
+	t.Run("null,s1", func(t *testing.T) { check(t, false, false, null, s1) })
+	t.Run("s2,nil", func(t *testing.T) { check(t, true, true, s2, snil) })
+	t.Run("s2,null", func(t *testing.T) { check(t, true, true, s2, null) })
+	t.Run("s1,s2", func(t *testing.T) { check(t, false, false, s1, s2) })
+	t.Run("s2,s1", func(t *testing.T) { check(t, false, false, s2, s1) })
+	t.Run("s3,s3", func(t *testing.T) { check(t, true, false, s3, s3) })
+	t.Run("{6,7},s3", func(t *testing.T) { check(t, false, false, subset3, s3) })
+	t.Run("s3,{6,7}", func(t *testing.T) { check(t, true, true, s3, subset3) })
 }
 
 func TestUnion(t *testing.T) {
