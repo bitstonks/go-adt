@@ -42,6 +42,27 @@ var s2 = New[E](3, 4, 5, 6, 7)
 var s3 = New[E](6, 7, 8, 9, 10)
 var subset3 = New[E](6, 7)
 
+func TestSameobject(t *testing.T) {
+	t.Parallel()
+
+	assert.True(t, sameobject[E](nil, nil))
+	assert.True(t, sameobject(snil, nil))
+	assert.True(t, sameobject(nil, snil))
+	assert.True(t, sameobject(s1, s1))
+	assert.False(t, sameobject(nil, null))
+	assert.False(t, sameobject(snil, null))
+	assert.False(t, sameobject(null, nil))
+	assert.False(t, sameobject(null, snil))
+	assert.False(t, sameobject(s1, nil))
+	assert.False(t, sameobject(nil, s1))
+	assert.False(t, sameobject(s1, snil))
+	assert.False(t, sameobject(snil, s1))
+	assert.False(t, sameobject(s1, null))
+	assert.False(t, sameobject(null, s1))
+	assert.False(t, sameobject(s1, s2))
+	assert.False(t, sameobject(s2, s1))
+}
+
 func TestCopy(t *testing.T) {
 	t.Parallel()
 
@@ -281,8 +302,12 @@ func TestIntersectionDisjoint(t *testing.T) {
 		assert.Equal(t, disjoint, f)
 	}
 
-	t.Run("s1,null", func(t *testing.T) { check(t, null, s1, snil) })
-	t.Run("s1,nil", func(t *testing.T) { check(t, null, s1, null) })
+	t.Run("snil,snil", func(t *testing.T) { check(t, null, snil, snil) })
+	t.Run("null,snil", func(t *testing.T) { check(t, null, null, snil) })
+	t.Run("snil,null", func(t *testing.T) { check(t, null, snil, null) })
+	t.Run("null,null", func(t *testing.T) { check(t, null, null, null) })
+	t.Run("s1,nil", func(t *testing.T) { check(t, null, s1, snil) })
+	t.Run("s1,null", func(t *testing.T) { check(t, null, s1, null) })
 	t.Run("nil,s1", func(t *testing.T) { check(t, null, snil, s1) })
 	t.Run("null,s1", func(t *testing.T) { check(t, null, null, s1) })
 	t.Run("s1,s1", func(t *testing.T) { check(t, s1, s1, s1) })
