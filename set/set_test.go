@@ -138,12 +138,12 @@ func TestEqual(t *testing.T) {
 	}
 
 	t.Run("nil,nil", func(t *testing.T) { check(t, true, snil, snil) })
-	t.Run("nil,null", func(t *testing.T) { check(t, false, snil, null) })
+	t.Run("nil,null", func(t *testing.T) { check(t, true, snil, null) })
 	t.Run("nil,s1", func(t *testing.T) { check(t, false, snil, s1) })
 	t.Run("nil,s2", func(t *testing.T) { check(t, false, snil, s2) })
 	t.Run("nil,s3", func(t *testing.T) { check(t, false, snil, s3) })
 
-	t.Run("null,nil", func(t *testing.T) { check(t, false, null, snil) })
+	t.Run("null,nil", func(t *testing.T) { check(t, true, null, snil) })
 	t.Run("null,null", func(t *testing.T) { check(t, true, null, null) })
 	t.Run("null,s1", func(t *testing.T) { check(t, false, null, s1) })
 	t.Run("null,s2", func(t *testing.T) { check(t, false, null, s2) })
@@ -168,12 +168,12 @@ func TestEqual(t *testing.T) {
 	t.Run("s3,s3", func(t *testing.T) { check(t, true, s3, s3) })
 
 	t.Run("nil,nil,nil", func(t *testing.T) { check(t, true, snil, snil, snil) })
-	t.Run("null,nil,nil", func(t *testing.T) { check(t, false, null, snil, snil) })
-	t.Run("nil,null,nil", func(t *testing.T) { check(t, false, snil, null, snil) })
-	t.Run("nil,nil,null", func(t *testing.T) { check(t, false, snil, snil, null) })
-	t.Run("null,null,nil", func(t *testing.T) { check(t, false, null, null, snil) })
-	t.Run("null,nil,null", func(t *testing.T) { check(t, false, null, snil, null) })
-	t.Run("nil,null,null", func(t *testing.T) { check(t, false, snil, null, null) })
+	t.Run("null,nil,nil", func(t *testing.T) { check(t, true, null, snil, snil) })
+	t.Run("nil,null,nil", func(t *testing.T) { check(t, true, snil, null, snil) })
+	t.Run("nil,nil,null", func(t *testing.T) { check(t, true, snil, snil, null) })
+	t.Run("null,null,nil", func(t *testing.T) { check(t, true, null, null, snil) })
+	t.Run("null,nil,null", func(t *testing.T) { check(t, true, null, snil, null) })
+	t.Run("nil,null,null", func(t *testing.T) { check(t, true, snil, null, null) })
 	t.Run("null,null,null", func(t *testing.T) { check(t, true, null, null, null) })
 
 	t.Run("s1,s1,s1", func(t *testing.T) { check(t, true, s1, s1, s1) })

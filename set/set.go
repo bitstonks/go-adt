@@ -19,18 +19,18 @@ func New[Key comparable](keys ...Key) Set[Key] {
 	return resultset
 }
 
-// Checks if sets are equal: ⋂(a, b, sets) = a
+// Checks if sets are equal: ⋂(a, b, sets...) = ⋃(a, b, sets...)
 func Equal[Key comparable](a, b Set[Key], sets ...Set[Key]) bool {
 	// The same set is always equal to itself.
 	if len(sets) == 0 && sameobject(a, b) {
 		return true
 	}
 
-	if !reflect.DeepEqual(a, b) {
+	if !equal(a, b) {
 		return false
 	}
 	for i := range sets {
-		if !reflect.DeepEqual(a, sets[i]) {
+		if !equal(a, sets[i]) {
 			return false
 		}
 	}
@@ -40,7 +40,7 @@ func Equal[Key comparable](a, b Set[Key], sets ...Set[Key]) bool {
 // Checks if sets are disjoint: ⋂(a, b, sets) = ∅
 func Disjoint[Key comparable](a, b Set[Key], sets ...Set[Key]) bool {
 	// The same set is never disjoint against itself unless it's the empty set.
-	if len(sets) == 0 && sameobject(a, b) {
+	if len(sets) == 0 && (sameobject(a, b) || (len(a) == 0 && len(b) == 0)) {
 		return (len(a) == 0)
 	}
 
@@ -339,6 +339,11 @@ func sameobject[Key comparable](a, b Set[Key]) bool {
 	va := reflect.ValueOf(a)
 	vb := reflect.ValueOf(b)
 	return va.UnsafePointer() == vb.UnsafePointer()
+}
+
+// All sets of zero length are equal, regardless of representation.
+func equal[Key comparable](a, b Set[Key]) bool {
+	return (len(a) == 0 && len(b) == 0) || reflect.DeepEqual(a, b)
 }
 
 func (s Set[Key]) clear() {
