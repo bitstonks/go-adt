@@ -219,8 +219,13 @@ func (s Set[Key]) Intersect(a Set[Key], sets ...Set[Key]) {
 		return
 	}
 
+	// The intersection of a set with an empty set is empty.
+	if len(a) == 0 {
+		s.clear()
+		return
+	}
+
 	// Clear the set if any of the arguments is an empty set.
-	sets = append(sets, a)
 	for i := range sets {
 		if len(sets[i]) == 0 {
 			s.clear()
@@ -228,6 +233,7 @@ func (s Set[Key]) Intersect(a Set[Key], sets ...Set[Key]) {
 		}
 	}
 
+	sets = append(sets, a)
 	rm := make([]Key, 0, len(s))
 outer:
 	for k := range s {
@@ -249,6 +255,11 @@ func Difference[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
 	// the difference of the same set.
 	if len(a) == 0 || sameobject(a, b) {
 		return make(Set[Key])
+	}
+
+	// The difference with a null set is the same set.
+	if len(b) == 0 && len(sets) == 0 {
+		return a.Copy()
 	}
 
 	sets = append(sets, b)
@@ -317,8 +328,7 @@ func (s Set[Key]) SymmetricRemove(a Set[Key], sets ...Set[Key]) {
 		return
 	}
 
-	rm := s.Copy()
-	rm.Intersect(a, sets...)
+	rm := Intersection(s, a, sets...)
 	s.Update(a, sets...)
 	s.Remove(rm)
 }
