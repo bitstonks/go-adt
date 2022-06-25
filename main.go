@@ -2,31 +2,33 @@ package main
 
 import (
 	"github.com/bitstonks/go-adt/set"
-	"golang.org/x/exp/constraints"
+
 	"sort"
 )
 
-func pset[K constraints.Ordered](s set.Set[K]) {
+type ynt struct{ n int }
+
+func pset(s set.Set[ynt]) {
 	i := 0
-	keys := make([]K, len(s))
+	keys := make([]ynt, len(s))
 	for e := range s {
 		keys[i] = e
 		i += 1
 	}
-	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
+	sort.Slice(keys, func(i, j int) bool { return keys[i].n < keys[j].n })
 
 	sep := ""
 	for i := range keys {
-		print(sep, keys[i])
+		print(sep, keys[i].n)
 		sep = " "
 	}
 	print("\n")
 }
 
 func main() {
-	var s set.Set[int]
-	s1 := set.New[int](1, 2, 3, 4, 5, 6, 7)
-	s2 := set.New[int](1, 0, 0, 4, 0, 0, 7, 8, 9)
+	var s set.Set[ynt]
+	s1 := set.New[ynt](ynt{1}, ynt{2}, ynt{3}, ynt{4}, ynt{5}, ynt{6}, ynt{7})
+	s2 := set.New[ynt](ynt{1}, ynt{0}, ynt{0}, ynt{4}, ynt{0}, ynt{0}, ynt{7}, ynt{8}, ynt{9})
 
 	print("s1 = ")
 	pset(s1)
