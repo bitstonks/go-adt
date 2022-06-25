@@ -24,7 +24,8 @@ Queries and comparison:
     contain the same keys: ⋂(_sets_) = ⋃(_sets_). The `nil` and empty sets
     are considered equal.
   * `set.Disjoint(sets...)` returns `true` if all the _sets_ have no keys in
-    common: ⋂(_sets_) = ∅, unless all _sets_ are empty.
+    common: ⋂(_sets_) = ∅. It follows that empty and `nil` sets are equal but
+    disjoint.
   * `s1.isSubset(s2)` checks if _s_<sub>1</sub> is a (proper) subset of
     _s_<sub>2</sub>: _s_<sub>1</sub> ⊆ _s_<sub>2</sub>.
   * `s1.isSuperset(s2)` is the opposite of `.isSubset()`: _s_<sub>1</sub> ⊇
