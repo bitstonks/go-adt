@@ -139,6 +139,9 @@ func (s Set[Key]) Del(key Key, keys ...Key) {
 
 	delete(s, key)
 	for i := range keys {
+		if len(s) == 0 {
+			return
+		}
 		delete(s, keys[i])
 	}
 }
@@ -240,6 +243,10 @@ outer:
 		for i := range sets {
 			if !sets[i].has(k) {
 				rm = append(rm, k)
+				if len(rm) == len(s) {
+					// The result will be empty.
+					break outer
+				}
 				continue outer
 			}
 		}
@@ -301,6 +308,10 @@ outer:
 		for i := range sets {
 			if sets[i].has(k) {
 				rm = append(rm, k)
+				if len(rm) == len(s) {
+					// The result will be empty.
+					break outer
+				}
 				continue outer
 			}
 		}

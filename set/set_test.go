@@ -42,7 +42,7 @@ var s2 = New[E](3, 4, 5, 6, 7)
 var s3 = New[E](6, 7, 8, 9, 10)
 var subset3 = New[E](6, 7)
 
-func TestSameobject(t *testing.T) {
+func TestPrivateSameobject(t *testing.T) {
 	t.Parallel()
 
 	assert.True(t, sameobject[E](nil, nil))
@@ -61,6 +61,27 @@ func TestSameobject(t *testing.T) {
 	assert.False(t, sameobject(null, s1))
 	assert.False(t, sameobject(s1, s2))
 	assert.False(t, sameobject(s2, s1))
+}
+
+func TestPrivateEqual(t *testing.T) {
+	t.Parallel()
+
+	assert.True(t, equal[E](nil, nil))
+	assert.True(t, equal(snil, nil))
+	assert.True(t, equal(nil, snil))
+	assert.True(t, equal(s1, s1))
+	assert.True(t, equal(nil, null))
+	assert.True(t, equal(snil, null))
+	assert.True(t, equal(null, nil))
+	assert.True(t, equal(null, snil))
+	assert.False(t, equal(s1, nil))
+	assert.False(t, equal(nil, s1))
+	assert.False(t, equal(s1, snil))
+	assert.False(t, equal(snil, s1))
+	assert.False(t, equal(s1, null))
+	assert.False(t, equal(null, s1))
+	assert.False(t, equal(s1, s2))
+	assert.False(t, equal(s2, s1))
 }
 
 func TestCopy(t *testing.T) {
@@ -128,6 +149,7 @@ func TestDel(t *testing.T) {
 	t.Run("s1,2,3,4", func(t *testing.T) { check(t, New[E](0, 1), s1, 2, 3, 4) })
 	t.Run("s2,2,3,4", func(t *testing.T) { check(t, New[E](5, 6, 7), s2, 2, 3, 4) })
 	t.Run("s3,2,3,4", func(t *testing.T) { check(t, s3, s3, 2, 3, 4) })
+	t.Run("s3,all", func(t *testing.T) { check(t, null, s3, 6, 7, 8, 9, 10, 6, 7, 8, 9, 10) })
 }
 
 func TestEqual(t *testing.T) {
@@ -364,6 +386,7 @@ func TestDifference(t *testing.T) {
 	t.Run("s3,s2", func(t *testing.T) { check(t, diff_s3_s2, s3, s2) })
 	t.Run("s1,s3", func(t *testing.T) { check(t, diff_s1_s3, s1, s3) })
 	t.Run("s3,s1", func(t *testing.T) { check(t, diff_s3_s1, s3, s1) })
+	t.Run("s1,s1,s2", func(t *testing.T) { check(t, null, s1, s1, s2) })
 	t.Run("s1,s2,s3", func(t *testing.T) { check(t, diff_s1_s2_s3, s1, s2, s3) })
 	t.Run("s1,s3,s2", func(t *testing.T) { check(t, diff_s1_s3_s2, s1, s3, s2) })
 	t.Run("s2,s1,s3", func(t *testing.T) { check(t, diff_s2_s1_s3, s2, s1, s3) })
