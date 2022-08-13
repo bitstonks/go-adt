@@ -1,3 +1,4 @@
+// Provides a generic implementation of a set of elements.
 package set
 
 import (
@@ -5,9 +6,10 @@ import (
 	"sort"
 )
 
+// Set is a generic set of elements (keys).
 type Set[Key comparable] map[Key]struct{}
 
-// Creates a new set that contains all the given keys.
+// New creates a new set that contains all the given keys.
 func New[Key comparable](keys ...Key) Set[Key] {
 	if len(keys) == 0 {
 		return make(Set[Key])
@@ -19,7 +21,7 @@ func New[Key comparable](keys ...Key) Set[Key] {
 	return resultset
 }
 
-// Checks if sets are equal: ⋂(a, b, sets...) = ⋃(a, b, sets...)
+// Equal checks if sets are equal: ⋂(a, b, sets...) = ⋃(a, b, sets...)
 func Equal[Key comparable](a, b Set[Key], sets ...Set[Key]) bool {
 	// The same set is always equal to itself.
 	if len(sets) == 0 && sameobject(a, b) {
@@ -37,7 +39,7 @@ func Equal[Key comparable](a, b Set[Key], sets ...Set[Key]) bool {
 	return true
 }
 
-// Checks if sets are disjoint: ⋂(a, b, sets) = ∅
+// Disjoint checks if sets are disjoint: ⋂(a, b, sets) = ∅
 func Disjoint[Key comparable](a, b Set[Key], sets ...Set[Key]) bool {
 	// The same set is never disjoint against itself unless it's the empty set.
 	if len(sets) == 0 && (sameobject(a, b) || (len(a) == 0 && len(b) == 0)) {
@@ -66,7 +68,7 @@ outer:
 	return true
 }
 
-// Returns a pair of values:
+// IsSubsetOf returns a pair of values:
 //  - ok=true if s is a subset of other
 //  - proper=true if s is a proper subset (i.e., !Equal(s, other)))
 func (s Set[Key]) IsSubsetOf(other Set[Key]) (ok bool, proper bool) {
@@ -88,14 +90,14 @@ func (s Set[Key]) IsSubsetOf(other Set[Key]) (ok bool, proper bool) {
 	return true, len(s) < len(other)
 }
 
-// Returns a pair of values:
+// IsSupersetOf returns a pair of values:
 //  - ok=true if s is a superset of other
 //  - proper=true if s is a proper superset (i.e., !Equal(s, other)))
 func (s Set[Key]) IsSupersetOf(other Set[Key]) (ok bool, proper bool) {
 	return other.IsSubsetOf(s)
 }
 
-// Creates a deep copy of the set. Will never return nil.
+// Copy creates a deep copy of the set. Will never return nil.
 func (s Set[Key]) Copy() Set[Key] {
 	resultset := make(Set[Key], len(s))
 	for k := range s {
@@ -104,7 +106,7 @@ func (s Set[Key]) Copy() Set[Key] {
 	return resultset
 }
 
-// Checks if the set contains all of the given keys.
+// Contains checks if the set contains all of the given keys.
 func (s Set[Key]) Contains(key Key, keys ...Key) bool {
 	// An empty set contains no keys.
 	if len(s) == 0 {
@@ -122,7 +124,7 @@ func (s Set[Key]) Contains(key Key, keys ...Key) bool {
 	return true
 }
 
-// Adds keys to the set.
+// Add inserts keys into the set.
 func (s Set[Key]) Add(key Key, keys ...Key) {
 	s[key] = struct{}{}
 	for i := range keys {
@@ -130,7 +132,7 @@ func (s Set[Key]) Add(key Key, keys ...Key) {
 	}
 }
 
-// Delets keys from the set.
+// Del removes keys from the set.
 func (s Set[Key]) Del(key Key, keys ...Key) {
 	// An empty set contains no keys.
 	if len(s) == 0 {
@@ -146,7 +148,7 @@ func (s Set[Key]) Del(key Key, keys ...Key) {
 	}
 }
 
-// The union of all the sets: ⋃(a, b, sets) = a ∪ b ∪ sets[0] ∪ sets[1] ...
+// Union returns the union of all the sets: ⋃(a, b, sets) = a ∪ b ∪ sets[0] ∪ sets[1] ...
 func Union[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
 	// The union of a set with itself is the set.
 	if len(sets) == 0 && sameobject(a, b) {
@@ -158,7 +160,7 @@ func Union[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
 	return resultset
 }
 
-// Like Union, but modifies the set in place.
+// Update is like Union, but modifies the set in place.
 func (s Set[Key]) Update(a Set[Key], sets ...Set[Key]) {
 	// The union of a set with itself is the set.
 	if len(sets) == 0 && sameobject(s, a) {
@@ -175,7 +177,7 @@ func (s Set[Key]) Update(a Set[Key], sets ...Set[Key]) {
 	}
 }
 
-// The intersection of all the sets: ⋂(a, b, sets) = a ∩ b ∩ sets[0] ∩ sets[1] ...
+// Intersetion returns the intersection of all the sets: ⋂(a, b, sets) = a ∩ b ∩ sets[0] ∩ sets[1] ...
 func Intersection[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
 	// The result will be empty if any of the sets are empty.
 	if len(a) == 0 || len(b) == 0 {
@@ -210,7 +212,7 @@ outer:
 	return resultset
 }
 
-// Like Intersection, but modifies the set in place.
+// Intersect is like Intersection, but modifies the set in place.
 func (s Set[Key]) Intersect(a Set[Key], sets ...Set[Key]) {
 	// The result will be empty if this set is empty.
 	if len(s) == 0 {
@@ -256,7 +258,7 @@ outer:
 	}
 }
 
-// The difference of all the sets: a ∖ b ∖ sets[0] ∖ sets[1] ...
+// Difference returns the difference of all the sets: a ∖ b ∖ sets[0] ∖ sets[1] ...
 func Difference[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
 	// The result will be empty if the first set is empty or when we're finding
 	// the difference of the same set.
@@ -283,7 +285,7 @@ outer:
 	return resultset
 }
 
-// Like Difference, but modifies the set in place.
+// Remove is like Difference, but modifies the set in place.
 func (s Set[Key]) Remove(a Set[Key], sets ...Set[Key]) {
 	// The result will be empty if this set is empty
 	if len(s) == 0 {
@@ -321,7 +323,8 @@ outer:
 	}
 }
 
-// Symmetric difference of all the sets: ⋃(a, b, sets) ∖ ⋂(a, b, sets).
+// SymmetricDifference returns the difference between the union and intersection
+// of all the sets: ⋃(a, b, sets) ∖ ⋂(a, b, sets).
 func SymmetricDifference[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Key] {
 	// The symmetric difference of a set with itself is the empty set.
 	if len(sets) == 0 && sameobject(a, b) {
@@ -331,7 +334,7 @@ func SymmetricDifference[Key comparable](a, b Set[Key], sets ...Set[Key]) Set[Ke
 	return Difference(Union(a, b, sets...), Intersection(a, b, sets...))
 }
 
-// Like SymmetricDifference, but modifies the set in place.
+// SymmetricRemove is like SymmetricDifference, but modifies the set in place.
 func (s Set[Key]) SymmetricRemove(a Set[Key], sets ...Set[Key]) {
 	// The symmetric difference of a set with itself is the empty set.
 	if len(sets) == 0 && sameobject(s, a) {
