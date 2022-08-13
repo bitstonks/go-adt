@@ -106,6 +106,15 @@ func (s Set[Key]) Copy() Set[Key] {
 	return resultset
 }
 
+// Elements returns all the keys in the set as an unordered slice.
+func (s Set[Key]) Elements() []Key {
+	keys := make([]Key, 0, len(s))
+	for k := range s {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
 // Contains checks if the set contains all of the given keys.
 func (s Set[Key]) Contains(key Key, keys ...Key) bool {
 	// An empty set contains no keys.
