@@ -30,6 +30,7 @@ Queries and comparison:
     _s_<sub>2</sub>: _s_<sub>1</sub> ⊆ _s_<sub>2</sub>.
   * `s1.isSuperset(s2)` is the opposite of `.isSubset()`: _s_<sub>1</sub> ⊇
     _s_<sub>2</sub>.
+  * `s.Elements()` returns the elements of _s_ as a slice.
 
 Non-modifying operations:
   * `set.Union(sets...)` creates a new set that is the union of all the _sets_.
