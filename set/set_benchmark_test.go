@@ -171,6 +171,18 @@ func BenchmarkCopy(b *testing.B) {
 	}
 }
 
+func BenchmarkElements_Null(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		nullSet.Elements()
+	}
+}
+
+func BenchmarkElements(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		randomSetX_1000.Elements()
+	}
+}
+
 func BenchmarkContains_Null(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		nullSet.Contains(0, randomKeys_1000...)
