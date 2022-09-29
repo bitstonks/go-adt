@@ -47,6 +47,8 @@ func TestBroadcaster_Unsubscribe(t *testing.T) {
 	sub1 := broadcast.Subscribe()
 	sub2 := broadcast.Subscribe()
 
+	// Ensure double Unsubscribe doesn't panic.
+	broadcast.Unsubscribe(sub1)
 	broadcast.Unsubscribe(sub1)
 	source <- 5318008
 	_, ok := <-sub1
@@ -74,7 +76,9 @@ func TestBufferedBroadcaster(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		assert.Equal(t, i, <-sub)
 	}
-	assert.Len(t, sub, 0)
+	// Channel is closed, becuase we couldn't keep up
+	_, ok := <-sub
+	assert.False(t, ok)
 }
 
 func TestBlockingBroadcaster(t *testing.T) {

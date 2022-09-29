@@ -73,18 +73,22 @@ func (s *Broadcaster[T]) serve(ctx context.Context) {
 		case newListener := <-s.addListener:
 			s.listeners[newListener] = struct{}{}
 		case listenerToRemove := <-s.removeListener:
-			// Cannot close using a read-only channel or remove the channel from a map.
-			for listener := range s.listeners {
-				if listener == listenerToRemove {
-					delete(s.listeners, listener)
-					close(listener)
-				}
-			}
+			s.removeSubscriber(listenerToRemove)
 		case val, ok := <-s.source:
 			if !ok { // Source channel was closed.
 				return
 			}
 			s.broadcast(ctx, val)
+		}
+	}
+}
+
+func (s *Broadcaster[T]) removeSubscriber(sub <-chan T) {
+	// Cannot close using a read-only channel or remove the channel from a map.
+	for listener := range s.listeners {
+		if listener == sub {
+			delete(s.listeners, listener)
+			close(listener)
 		}
 	}
 }
@@ -111,6 +115,7 @@ func (s *Broadcaster[T]) tryBroadcast(_ context.Context, val T) {
 		case listener <- val:
 		default:
 			// TODO: log? report? unsubscribe?
+			s.removeSubscriber(listener)
 		}
 	}
 }
