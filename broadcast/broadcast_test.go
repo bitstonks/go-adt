@@ -12,7 +12,7 @@ func ExampleBroadcaster() {
 	source := make(chan int, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast := New(ctx, source)
+	broadcast := NewBestEffort(ctx, source)
 	sub1 := broadcast.Subscribe()
 	sub2 := broadcast.Subscribe()
 	source <- 5318008
@@ -27,7 +27,7 @@ func TestBroadcaster_Subscribe(t *testing.T) {
 	source := make(chan int, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast := New(ctx, source)
+	broadcast := NewBestEffort(ctx, source)
 	sub1 := broadcast.Subscribe()
 	sub2 := broadcast.Subscribe()
 	source <- 5318008
@@ -43,7 +43,7 @@ func TestBroadcaster_Unsubscribe(t *testing.T) {
 	source := make(chan int, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast := New(ctx, source)
+	broadcast := NewBestEffort(ctx, source)
 	sub1 := broadcast.Subscribe()
 	sub2 := broadcast.Subscribe()
 
@@ -60,11 +60,12 @@ func TestBroadcaster_Unsubscribe(t *testing.T) {
 	assert.Equal(t, false, ok)
 }
 
-func TestBufferedBroadcaster(t *testing.T) {
+func TestUnsubscribingBroadcaster(t *testing.T) {
 	source := make(chan int)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast := NewBuffered(ctx, source, 10, false)
+	broadcast, err := New(ctx, source, 10, Unsubscribe)
+	assert.NoError(t, err)
 	sub := broadcast.Subscribe()
 
 	// Overfill the buffer
@@ -81,11 +82,12 @@ func TestBufferedBroadcaster(t *testing.T) {
 	assert.False(t, ok)
 }
 
-func TestBlockingBroadcaster(t *testing.T) {
+func TestWaitingBroadcaster(t *testing.T) {
 	source := make(chan int)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast := NewBuffered(ctx, source, 10, true)
+	broadcast, err := New(ctx, source, 10, Wait)
+	assert.NoError(t, err)
 	sub := broadcast.Subscribe()
 
 	// (Over)Fill the buffer
@@ -118,11 +120,11 @@ func TestBlockingBroadcaster(t *testing.T) {
 	assert.Len(t, sub, 0)
 }
 
-func TestUnbufferedBroadcaster(t *testing.T) {
+func TestSynchronousBroadcaster(t *testing.T) {
 	source := make(chan int)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast := NewUnbuffered(ctx, source)
+	broadcast := NewSynchronous(ctx, source)
 	sub := broadcast.Subscribe()
 
 	source <- 5318008
@@ -142,7 +144,7 @@ func TestUnbufferedBroadcaster(t *testing.T) {
 func TestBroadcaster_closeAll(t *testing.T) {
 	source := make(chan int, 1)
 	ctx, cancel := context.WithCancel(context.Background())
-	broadcast := New(ctx, source)
+	broadcast := NewBestEffort(ctx, source)
 	sub1 := broadcast.Subscribe()
 	sub2 := broadcast.Subscribe()
 	source <- 5318008
