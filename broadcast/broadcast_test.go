@@ -3,6 +3,7 @@ package broadcast
 import (
 	"context"
 	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -156,4 +157,41 @@ func TestBroadcaster_closeAll(t *testing.T) {
 	assert.Equal(t, false, ok)
 	_, ok = <-sub2
 	assert.Equal(t, false, ok)
+}
+
+func consume[T any](c <-chan T, n int, wg *sync.WaitGroup) {
+	for i := 0; i < n; i++ {
+		<-c
+	}
+	wg.Done()
+}
+
+func testMultipleListeners(broadcast *Broadcaster[int], source chan int, m int) func(*testing.B) {
+	return func(b *testing.B) {
+		var wg sync.WaitGroup
+		wg.Add(m)
+		for i := 0; i < m; i++ {
+			sub := broadcast.Subscribe()
+			go consume(sub, b.N, &wg)
+			defer broadcast.Unsubscribe(sub)
+		}
+		b.ResetTimer()
+		for i := 0; i < b.N; i++ {
+			source <- i
+		}
+		wg.Wait()
+	}
+}
+
+func BenchmarkWaiting(b *testing.B) {
+	for _, bufSize := range []int{0, 1, 5, 10, 100} {
+		source := make(chan int, bufSize)
+		ctx, cancel := context.WithCancel(context.Background())
+		broadcast, _ := New(ctx, source, bufSize, Wait)
+		for _, m := range []int{1, 2, 5, 10, 100} {
+			b.Run(fmt.Sprintf("buffer:%v, subs:%v", bufSize, m), testMultipleListeners(broadcast, source, m))
+		}
+		cancel()
+		close(source)
+	}
 }
