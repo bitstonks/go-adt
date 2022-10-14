@@ -91,10 +91,25 @@ func TestCopy(t *testing.T) {
 		assert.Equal(t, expected, s.Copy())
 	}
 	t.Run("nil", func(t *testing.T) { check(t, null, nil) })
+	t.Run("snil", func(t *testing.T) { check(t, null, snil) })
 	t.Run("null", func(t *testing.T) { check(t, null, null) })
 	t.Run("s1", func(t *testing.T) { check(t, s1, s1) })
 	t.Run("s2", func(t *testing.T) { check(t, s2, s2) })
 	t.Run("s3", func(t *testing.T) { check(t, s3, s3) })
+}
+
+func TestElements(t *testing.T) {
+	t.Parallel()
+
+	check := func(t *testing.T, expected []E, s Set[E]) {
+		assert.ElementsMatch(t, expected, s.Elements())
+	}
+	t.Run("nil", func(t *testing.T) { check(t, []E{}, nil) })
+	t.Run("snil", func(t *testing.T) { check(t, []E{}, snil) })
+	t.Run("null", func(t *testing.T) { check(t, []E{}, null) })
+	t.Run("s1", func(t *testing.T) { check(t, []E{0, 1, 2, 3, 4}, s1) })
+	t.Run("s2", func(t *testing.T) { check(t, []E{3, 4, 5, 6, 7}, s2) })
+	t.Run("s3", func(t *testing.T) { check(t, []E{6, 7, 8, 9, 10}, s3) })
 }
 
 func TestContains(t *testing.T) {
