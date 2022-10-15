@@ -9,11 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func ExampleBroadcaster() {
+func ExampleChanBroadcaster() {
 	source := make(chan int, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast := NewBestEffort(ctx, source)
+	broadcast := NewBestEffortChanBroadcaster(ctx, source)
 	sub1 := broadcast.Subscribe()
 	sub2 := broadcast.Subscribe()
 	source <- 5318008
@@ -24,11 +24,11 @@ func ExampleBroadcaster() {
 	// Sub2: 5318008
 }
 
-func TestBroadcaster_Subscribe(t *testing.T) {
+func TestChanBroadcaster_Subscribe(t *testing.T) {
 	source := make(chan int, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast := NewBestEffort(ctx, source)
+	broadcast := NewBestEffortChanBroadcaster(ctx, source)
 	sub1 := broadcast.Subscribe()
 	sub2 := broadcast.Subscribe()
 	source <- 5318008
@@ -40,11 +40,11 @@ func TestBroadcaster_Subscribe(t *testing.T) {
 	assert.Equal(t, 42, <-sub2)
 }
 
-func TestBroadcaster_Unsubscribe(t *testing.T) {
+func TestChanBroadcaster_Unsubscribe(t *testing.T) {
 	source := make(chan int, 1)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast := NewBestEffort(ctx, source)
+	broadcast := NewBestEffortChanBroadcaster(ctx, source)
 	sub1 := broadcast.Subscribe()
 	sub2 := broadcast.Subscribe()
 
@@ -61,11 +61,11 @@ func TestBroadcaster_Unsubscribe(t *testing.T) {
 	assert.Equal(t, false, ok)
 }
 
-func TestUnsubscribingBroadcaster(t *testing.T) {
+func TestUnsubscribingChanBroadcaster(t *testing.T) {
 	source := make(chan int)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast, err := New(ctx, source, 10, Unsubscribe)
+	broadcast, err := NewChanBroadcaster(ctx, source, 10, Unsubscribe)
 	assert.NoError(t, err)
 	sub := broadcast.Subscribe()
 
@@ -83,11 +83,11 @@ func TestUnsubscribingBroadcaster(t *testing.T) {
 	assert.False(t, ok)
 }
 
-func TestWaitingBroadcaster(t *testing.T) {
+func TestWaitingChanBroadcaster(t *testing.T) {
 	source := make(chan int)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast, err := New(ctx, source, 10, Wait)
+	broadcast, err := NewChanBroadcaster(ctx, source, 10, Wait)
 	assert.NoError(t, err)
 	sub := broadcast.Subscribe()
 
@@ -121,11 +121,11 @@ func TestWaitingBroadcaster(t *testing.T) {
 	assert.Len(t, sub, 0)
 }
 
-func TestSynchronousBroadcaster(t *testing.T) {
+func TestSynchronousChanBroadcaster(t *testing.T) {
 	source := make(chan int)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	broadcast := NewSynchronous(ctx, source)
+	broadcast := NewSynchronousChanBroadcaster(ctx, source)
 	sub := broadcast.Subscribe()
 
 	source <- 5318008
@@ -142,10 +142,10 @@ func TestSynchronousBroadcaster(t *testing.T) {
 	assert.Equal(t, 5318008, <-sub)
 }
 
-func TestBroadcaster_closeAll(t *testing.T) {
+func TestChanBroadcaster_closeAll(t *testing.T) {
 	source := make(chan int, 1)
 	ctx, cancel := context.WithCancel(context.Background())
-	broadcast := NewBestEffort(ctx, source)
+	broadcast := NewBestEffortChanBroadcaster(ctx, source)
 	sub1 := broadcast.Subscribe()
 	sub2 := broadcast.Subscribe()
 	source <- 5318008
@@ -159,14 +159,7 @@ func TestBroadcaster_closeAll(t *testing.T) {
 	assert.Equal(t, false, ok)
 }
 
-func consume[T any](c <-chan T, n int, wg *sync.WaitGroup) {
-	for i := 0; i < n; i++ {
-		<-c
-	}
-	wg.Done()
-}
-
-func testMultipleListeners(broadcast *Broadcaster[int], source chan int, m int) func(*testing.B) {
+func testMultipleListeners(broadcast *ChanBroadcaster[int], source chan int, m int) func(*testing.B) {
 	return func(b *testing.B) {
 		var wg sync.WaitGroup
 		wg.Add(m)
@@ -183,11 +176,11 @@ func testMultipleListeners(broadcast *Broadcaster[int], source chan int, m int) 
 	}
 }
 
-func BenchmarkWaiting(b *testing.B) {
+func BenchmarkWaitingChanBroadcaster(b *testing.B) {
 	for _, bufSize := range []int{0, 1, 5, 10, 100} {
 		source := make(chan int, bufSize)
 		ctx, cancel := context.WithCancel(context.Background())
-		broadcast, _ := New(ctx, source, bufSize, Wait)
+		broadcast, _ := NewChanBroadcaster(ctx, source, bufSize, Wait)
 		for _, m := range []int{1, 2, 5, 10, 100} {
 			b.Run(fmt.Sprintf("buffer:%v, subs:%v", bufSize, m), testMultipleListeners(broadcast, source, m))
 		}
