@@ -10,3 +10,7 @@ Go implementations of different abstract data types using generics.
 Requires Go 1.18+.
 
  * `./set`: [generic set](https://pkg.go.dev/github.com/bitstonks/go-adt/set)
+ * `./broadcast`: [one to many broadcast service](https://pkg.go.dev/github.com/bitstonks/go-adt/broadcast)
+     * [NoSyncBroadcaster](https://pkg.go.dev/github.com/bitstonks/go-adt/broadcast#NoSyncBroadcaster) - subscribe, unsibscribe and send actions have to be synchronised externally
+     * [SyncBroadcaster](https://pkg.go.dev/github.com/bitstonks/go-adt/broadcast#SyncBroadcaster) - actions are synchronised using an internal mutex
+     * [ChanBroadcaster](https://pkg.go.dev/github.com/bitstonks/go-adt/broadcast#ChanBroadcaster) - actions are synchronised using channels and processed in an eventloop
