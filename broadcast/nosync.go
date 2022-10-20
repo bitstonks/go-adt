@@ -23,14 +23,14 @@ func NewNoSyncBroadcaster[T any](bufferSize int) *NoSyncBroadcaster[T] {
 }
 
 // Subscribe creates and returns a new channel that will receive all messages
-// send by the sender via this broadcast service.
+// sent by the sender via this broadcast service.
 func (b *NoSyncBroadcaster[T]) Subscribe() <-chan T {
 	ch := make(chan T, b.bufferSize)
 	b.AddSubscriber(ch)
 	return ch
 }
 
-// AddSubscriber gives subscribers the option to provide their own chanel to
+// AddSubscriber gives subscribers the option to provide their own channel to
 // receive updates on. In case they already have allocated one and want to
 // reuse it or if the default bufferSize isn't OK for them.
 func (b *NoSyncBroadcaster[T]) AddSubscriber(sub chan T) {
@@ -40,8 +40,8 @@ func (b *NoSyncBroadcaster[T]) AddSubscriber(sub chan T) {
 // Unsubscribe will stop the service sending messages on this channel and close
 // the channel. Returns true if the provided channel is a valid subscriber.
 func (b *NoSyncBroadcaster[T]) Unsubscribe(sub <-chan T) bool {
-	if sub, ok := b.subscribers[sub]; ok {
-		close(sub)
+	if ch, ok := b.subscribers[sub]; ok {
+		close(ch)
 		delete(b.subscribers, sub)
 		return true
 	}
