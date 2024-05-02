@@ -1,21 +1,20 @@
 // deque provides a generic implementation of a double-ended queue.
 //
-// Using it as a queue is faster than using a slice, because it doesn't need to shift elements.
-// Below is a benchmark result showing 1.7x speedup when using deque instead of a slice.
+// Using it as a queue is faster than using a slice because it doesn't need to shift elements.
+// Below is a benchmark result showing over 3x speedup when using deque instead of a slice.
 // ```
-// $ GOMAXPROCS=1 go test -benchmem -run=^$ -bench ^Benchmark.+_Queue$ ./deque -count=3
-// goos: darwin
+// goos: linux
 // goarch: amd64
 // pkg: github.com/bitstonks/go-adt/deque
-// cpu: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz
-// BenchmarkDeque_Queue    71107292                16.84 ns/op            0 B/op          0 allocs/op
-// BenchmarkDeque_Queue    70529484                17.62 ns/op            0 B/op          0 allocs/op
-// BenchmarkDeque_Queue    70236950                16.94 ns/op            0 B/op          0 allocs/op
-// BenchmarkSlice_Queue    40343143                29.30 ns/op           16 B/op          1 allocs/op
-// BenchmarkSlice_Queue    41047531                29.22 ns/op           16 B/op          1 allocs/op
-// BenchmarkSlice_Queue    40031304                28.95 ns/op           16 B/op          1 allocs/op
+// cpu: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
+// BenchmarkDeque_Queue    127719072                9.260 ns/op           0 B/op          0 allocs/op
+// BenchmarkDeque_Queue    128505860                9.423 ns/op           0 B/op          0 allocs/op
+// BenchmarkDeque_Queue    127933101                9.170 ns/op           0 B/op          0 allocs/op
+// BenchmarkSlice_Queue    32121012                32.11 ns/op           16 B/op          1 allocs/op
+// BenchmarkSlice_Queue    33130184                32.16 ns/op           16 B/op          1 allocs/op
+// BenchmarkSlice_Queue    37404979                32.28 ns/op           16 B/op          1 allocs/op
 // PASS
-// ok      github.com/bitstonks/go-adt/deque       7.508s
+// ok      github.com/bitstonks/go-adt/deque       10.442s
 // ```
 package deque
 
